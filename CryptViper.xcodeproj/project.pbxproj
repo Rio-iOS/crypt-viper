@@ -17,9 +17,22 @@
 		3484112D2A04066100329394 /* Entity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3484112C2A04066100329394 /* Entity.swift */; };
 		3484112F2A04067200329394 /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3484112E2A04067200329394 /* Router.swift */; };
 		348411362A054C7B00329394 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 348411352A054C7B00329394 /* DetailView.swift */; };
+		55C85F830F467AE946F71284 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2AD2BCEAFA406B5BB2EF4384 /* Foundation.framework */; };
+		FE2C5C6D7FAE9BC8D07A289A /* CryptoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0A2E6AF7A5B4AE8C7DCABBC /* CryptoTests.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		EE5811DDD7DBF4F44615CA1B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 348411072A04057200329394 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3484110E2A04057200329394;
+			remoteInfo = CryptViper;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		2AD2BCEAFA406B5BB2EF4384 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		3484110F2A04057200329394 /* CryptViper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CryptViper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		348411122A04057200329394 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		348411142A04057200329394 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -32,9 +45,19 @@
 		3484112C2A04066100329394 /* Entity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Entity.swift; sourceTree = "<group>"; };
 		3484112E2A04067200329394 /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
 		348411352A054C7B00329394 /* DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
+		386DC305D410D484791252EF /* CryptViperTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CryptViperTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D0A2E6AF7A5B4AE8C7DCABBC /* CryptoTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CryptoTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		0DB9FCCD5BEF45B635993A7A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				55C85F830F467AE946F71284 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3484110C2A04057200329394 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -50,6 +73,8 @@
 			children = (
 				348411112A04057200329394 /* CryptViper */,
 				348411102A04057200329394 /* Products */,
+				3A40B499AADE1635470ACCCF /* Frameworks */,
+				9DEE06B1A903A9B4F3A9AED3 /* CryptViperTests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -57,6 +82,7 @@
 			isa = PBXGroup;
 			children = (
 				3484110F2A04057200329394 /* CryptViper.app */,
+				386DC305D410D484791252EF /* CryptViperTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -95,6 +121,31 @@
 			path = Detail;
 			sourceTree = "<group>";
 		};
+		3A40B499AADE1635470ACCCF /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				5B05DC3D46B7DEC508B67420 /* iOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		5B05DC3D46B7DEC508B67420 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				2AD2BCEAFA406B5BB2EF4384 /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		9DEE06B1A903A9B4F3A9AED3 /* CryptViperTests */ = {
+			isa = PBXGroup;
+			children = (
+				D0A2E6AF7A5B4AE8C7DCABBC /* CryptoTests.swift */,
+			);
+			name = CryptViperTests;
+			path = CryptViperTests;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -114,6 +165,24 @@
 			productName = CryptViper;
 			productReference = 3484110F2A04057200329394 /* CryptViper.app */;
 			productType = "com.apple.product-type.application";
+		};
+		F8FB6DD2818414D8BC4D9856 /* CryptViperTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 40D2B7F79001915BB8B344A1 /* Build configuration list for PBXNativeTarget "CryptViperTests" */;
+			buildPhases = (
+				894843371A28B28100DEDBF3 /* Sources */,
+				0DB9FCCD5BEF45B635993A7A /* Frameworks */,
+				F78786322A7C382850857D61 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2755108C8359446172B8E964 /* PBXTargetDependency */,
+			);
+			name = CryptViperTests;
+			productName = CryptViperTests;
+			productReference = 386DC305D410D484791252EF /* CryptViperTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -144,6 +213,7 @@
 			projectRoot = "";
 			targets = (
 				3484110E2A04057200329394 /* CryptViper */,
+				F8FB6DD2818414D8BC4D9856 /* CryptViperTests */,
 			);
 		};
 /* End PBXProject section */
@@ -155,6 +225,13 @@
 			files = (
 				3484111F2A04057300329394 /* LaunchScreen.storyboard in Resources */,
 				3484111C2A04057300329394 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F78786322A7C382850857D61 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -176,7 +253,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		894843371A28B28100DEDBF3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FE2C5C6D7FAE9BC8D07A289A /* CryptoTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		2755108C8359446172B8E964 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = CryptViper;
+			target = 3484110E2A04057200329394 /* CryptViper */;
+			targetProxy = EE5811DDD7DBF4F44615CA1B /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		3484111D2A04057300329394 /* LaunchScreen.storyboard */ = {
@@ -190,6 +284,37 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		0749204F47DE30A75C52F2D5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.riofujimon.CryptViperTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CryptViper.app/CryptViper";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		115AAC276DB13502199AD4C4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.riofujimon.CryptViperTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CryptViper.app/CryptViper";
+			};
+			name = Debug;
+		};
 		348411212A04057300329394 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -383,6 +508,15 @@
 			buildConfigurations = (
 				348411242A04057300329394 /* Debug */,
 				348411252A04057300329394 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		40D2B7F79001915BB8B344A1 /* Build configuration list for PBXNativeTarget "CryptViperTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0749204F47DE30A75C52F2D5 /* Release */,
+				115AAC276DB13502199AD4C4 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

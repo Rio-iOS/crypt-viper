@@ -1,0 +1,32 @@
+name: Quality
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    runs-on: macos-26
+    timeout-minutes: 20
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Toolchain
+        run: xcodebuild -version
+      - name: Install SwiftFormat 0.58.5
+        run: |
+          curl --fail --location --retry 3 https://github.com/nicklockwood/SwiftFormat/releases/download/0.58.5/swiftformat.zip -o "$RUNNER_TEMP/swiftformat.zip"
+          unzip -q "$RUNNER_TEMP/swiftformat.zip" -d "$RUNNER_TEMP/swiftformat"
+          chmod +x "$RUNNER_TEMP/swiftformat/swiftformat"
+      - name: Check formatting
+        run: '"$RUNNER_TEMP/swiftformat/swiftformat" CryptViper CryptViperTests --lint'
+      - name: Tests
+        run: Scripts/test.sh

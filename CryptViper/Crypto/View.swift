@@ -10,71 +10,72 @@ import UIKit
 
 /*
  View
- 
+
  - Viewは、Presenterとやりとりをする
  - Talks to -> Presenter
  - Viewの内部には、ClassやProtocolがある
- - 
+ -
  */
 
-protocol AnyView {
+protocol AnyView: AnyObject {
     var presenter: AnyPresenter? { get set }
     func update(with cryptos: [Crypto])
     func update(with error: String)
 }
 
-class CryptoViewController: UIViewController, AnyView  {
-
+class CryptoViewController: UIViewController, AnyView {
     var presenter: AnyPresenter?
-    
+
     var cryptos: [Crypto] = []
-    
+
     private let tableView: UITableView = {
         let tableView = UITableView()
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         // 初期のデータが存在しない場合には、TableViewを見せない
         tableView.isHidden = true
-        
+
         return tableView
     }()
-    
+
     private let messageLabel: UILabel = {
         let label = UILabel()
         label.isHidden = false
         label.text = "Downloading ..."
         label.font = UIFont.systemFont(ofSize: 20)
-        label.textColor = .black
+        label.textColor = .label
         label.textAlignment = .center
         return label
     }()
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        view.backgroundColor = .yellow
-        
+
+        view.backgroundColor = .systemBackground
+
         view.addSubview(tableView)
         view.addSubview(messageLabel)
-        
+
         tableView.delegate = self
         tableView.dataSource = self
+        presenter?.viewDidLoad()
     }
-    
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         tableView.frame = view.bounds
         messageLabel.frame = CGRect(x: view.frame.width / 2 - 100, y: view.frame.height / 2 - 25, width: 200, height: 100)
     }
-    
+
     func update(with cryptos: [Crypto]) {
         DispatchQueue.main.async {
             self.cryptos = cryptos
-            self.messageLabel.isHidden = true
+            self.messageLabel.text = "No cryptocurrencies available."
+            self.messageLabel.isHidden = !cryptos.isEmpty
             self.tableView.reloadData()
-            self.tableView.isHidden = false
+            self.tableView.isHidden = cryptos.isEmpty
         }
     }
-    
+
     func update(with error: String) {
         DispatchQueue.main.async {
             self.cryptos = []
@@ -83,34 +84,31 @@ class CryptoViewController: UIViewController, AnyView  {
             self.messageLabel.isHidden = false
         }
     }
-    
-    
 }
 
 extension CryptoViewController: UITableViewDelegate {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
         return cryptos.count
     }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+
+    func tableView(_: UITableView, didSelectRowAt indexPath: IndexPath) {
         let nextViewController = DetailViewController()
         nextViewController.currency = cryptos[indexPath.row].currency
         nextViewController.price = cryptos[indexPath.row].price
-        
-        self.present(nextViewController, animated: true)
+
+        present(nextViewController, animated: true)
     }
 }
 
 extension CryptoViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         var content = cell.defaultContentConfiguration()
         content.text = cryptos[indexPath.row].currency
         content.secondaryText = cryptos[indexPath.row].price
         cell.contentConfiguration = content
-        cell.backgroundColor = .yellow
-        
+        cell.backgroundColor = .systemBackground
+
         return cell
     }
 }
