@@ -23,13 +23,13 @@ VIPERの役割分担と、HTTP通信から一覧表示までの流れを学ぶiO
 ## 検証
 
 ```sh
-Scripts/test.sh
+swift Scripts/test.swift
 ```
 
 Simulatorを指定する場合:
 
 ```sh
-TEST_DESTINATION='platform=iOS Simulator,id=YOUR_SIMULATOR_UDID' Scripts/test.sh
+TEST_DESTINATION='platform=iOS Simulator,id=YOUR_SIMULATOR_UDID' swift Scripts/test.swift
 ```
 
 テストではHTTP通信をURLProtocolで置き換え、正常JSON・空配列・503応答・不正JSON・オフラインを検証します。また、通信開始のタイミングとView・Presenter・Interactor・Routerの解放を確認します。

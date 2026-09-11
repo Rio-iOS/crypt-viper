@@ -29,4 +29,4 @@ jobs:
       - name: Check formatting
         run: '"$RUNNER_TEMP/swiftformat/swiftformat" CryptViper CryptViperTests --lint'
       - name: Tests
-        run: Scripts/test.sh
+        run: swift Scripts/test.swift
