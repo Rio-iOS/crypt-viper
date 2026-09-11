@@ -1,7 +1,8 @@
 import Foundation
 
 protocol CryptocurrencyListPresenting: AnyObject {
-    func viewDidLoad()
+    func loadCryptocurrencies()
+    func cancelLoading()
     func didSelect(_ cryptocurrency: Cryptocurrency)
 }
 
@@ -17,8 +18,13 @@ final class CryptocurrencyListPresenter: CryptocurrencyListPresenting, Cryptocur
         self.router = router
     }
 
-    func viewDidLoad() {
+    func loadCryptocurrencies() {
+        view?.showLoading()
         interactor.fetchCryptocurrencies()
+    }
+
+    func cancelLoading() {
+        interactor.cancelFetching()
     }
 
     func didSelect(_ cryptocurrency: Cryptocurrency) {

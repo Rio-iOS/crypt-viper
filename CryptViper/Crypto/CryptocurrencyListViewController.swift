@@ -1,6 +1,7 @@
 import UIKit
 
 protocol CryptocurrencyListView: AnyObject {
+    func showLoading()
     func show(_ cryptocurrencies: [Cryptocurrency])
     func showError(message: String)
 }
@@ -11,6 +12,7 @@ final class CryptocurrencyListViewController: UIViewController, CryptocurrencyLi
     private var cryptocurrencies: [Cryptocurrency] = []
     private let tableView = UITableView()
     private let messageLabel = UILabel()
+    private let retryButton = UIButton(type: .system)
 
     /// Viewをロードする前にPresenterを接続します。
     ///
@@ -33,7 +35,12 @@ final class CryptocurrencyListViewController: UIViewController, CryptocurrencyLi
         messageLabel.textColor = .label
         messageLabel.textAlignment = .center
         messageLabel.numberOfLines = 0
-        for subview in [tableView, messageLabel] {
+        retryButton.setTitle("Retry", for: .normal)
+        retryButton.titleLabel?.font = .preferredFont(forTextStyle: .headline)
+        retryButton.titleLabel?.adjustsFontForContentSizeCategory = true
+        retryButton.isHidden = true
+        retryButton.addTarget(self, action: #selector(retryTapped), for: .touchUpInside)
+        for subview in [tableView, messageLabel, retryButton] {
             subview.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview(subview)
         }
@@ -45,12 +52,36 @@ final class CryptocurrencyListViewController: UIViewController, CryptocurrencyLi
             messageLabel.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
             messageLabel.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
             messageLabel.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor),
+            retryButton.topAnchor.constraint(equalTo: messageLabel.bottomAnchor, constant: 16),
+            retryButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            retryButton.bottomAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor),
         ])
-        presenter?.viewDidLoad()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        presenter?.loadCryptocurrencies()
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        presenter?.cancelLoading()
+    }
+
+    @objc private func retryTapped() {
+        presenter?.loadCryptocurrencies()
+    }
+
+    func showLoading() {
+        retryButton.isHidden = true
+        tableView.isHidden = true
+        messageLabel.text = "Downloading…"
+        messageLabel.isHidden = false
     }
 
     func show(_ cryptocurrencies: [Cryptocurrency]) {
         self.cryptocurrencies = cryptocurrencies
+        retryButton.isHidden = !cryptocurrencies.isEmpty
         messageLabel.text = "No cryptocurrencies available."
         messageLabel.isHidden = !cryptocurrencies.isEmpty
         tableView.isHidden = cryptocurrencies.isEmpty
@@ -58,6 +89,7 @@ final class CryptocurrencyListViewController: UIViewController, CryptocurrencyLi
     }
 
     func showError(message: String) {
+        retryButton.isHidden = false
         cryptocurrencies = []
         tableView.reloadData()
         tableView.isHidden = true

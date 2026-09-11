@@ -8,7 +8,7 @@ final class CryptocurrencyListPresenterTests: XCTestCase {
         let view = ViewSpy()
         let presenter = CryptocurrencyListPresenter(view: view, interactor: interactor, router: RouterSpy())
         XCTAssertEqual(interactor.requestCount, 0)
-        presenter.viewDidLoad()
+        presenter.loadCryptocurrencies()
         XCTAssertEqual(interactor.requestCount, 1)
     }
 
@@ -170,12 +170,15 @@ final class CryptocurrencyListInteractorTests: XCTestCase {
 
 private final class InteractorSpy: CryptocurrencyListInteracting {
     private(set) var requestCount = 0
+    private(set) var cancellationCount = 0
     func fetchCryptocurrencies() { requestCount += 1 }
+    func cancelFetching() { cancellationCount += 1 }
 }
 
 private final class ViewSpy: CryptocurrencyListView {
     private(set) var cryptocurrencies: [Cryptocurrency]?
     private(set) var errorMessage: String?
+    func showLoading() {}
     func show(_ cryptocurrencies: [Cryptocurrency]) { self.cryptocurrencies = cryptocurrencies }
     func showError(message: String) { errorMessage = message }
 }
@@ -214,4 +217,52 @@ private final class CryptoURLProtocol: URLProtocol {
     }
 
     override func stopLoading() {}
+}
+
+final class CryptocurrencyListViewTests: XCTestCase {
+    @MainActor func testErrorRetryLoadingSuccessAndSelectionUseTheActualView() throws {
+        let view = CryptocurrencyListViewController()
+        let interactor = InteractorSpy()
+        let router = RouterSpy()
+        let presenter = CryptocurrencyListPresenter(view: view, interactor: interactor, router: router)
+        view.configure(presenter: presenter)
+        view.loadViewIfNeeded()
+        view.viewWillAppear(false)
+        let button = try XCTUnwrap(view.view.subviews.compactMap { $0 as? UIButton }.first)
+        let table = try XCTUnwrap(view.view.subviews.compactMap { $0 as? UITableView }.first)
+        XCTAssertEqual(interactor.requestCount, 1)
+        XCTAssertTrue(button.isHidden)
+        presenter.didFetchCryptocurrencies(.failure(URLError(.timedOut)))
+        XCTAssertFalse(button.isHidden)
+        XCTAssertTrue(table.isHidden)
+        button.sendActions(for: .touchUpInside)
+        XCTAssertEqual(interactor.requestCount, 2)
+        XCTAssertTrue(button.isHidden)
+        let quote = Cryptocurrency(currency: "BTC", price: "100")
+        presenter.didFetchCryptocurrencies(.success([quote]))
+        XCTAssertFalse(table.isHidden)
+        XCTAssertEqual(table.dataSource?.tableView(table, numberOfRowsInSection: 0), 1)
+        let cell = try XCTUnwrap(table.dataSource?.tableView(table, cellForRowAt: IndexPath(row: 0, section: 0)))
+        let content = try XCTUnwrap(cell.contentConfiguration as? UIListContentConfiguration)
+        XCTAssertEqual(content.text, "BTC")
+        XCTAssertEqual(content.secondaryText, "100")
+        table.delegate?.tableView?(table, didSelectRowAt: IndexPath(row: 0, section: 0))
+        XCTAssertEqual(router.selectedCryptocurrency, quote)
+        view.viewWillDisappear(false)
+        XCTAssertEqual(interactor.cancellationCount, 1)
+    }
+
+    @MainActor func testEmptyStateCanRetryWithoutShowingStaleRows() throws {
+        let view = CryptocurrencyListViewController()
+        let interactor = InteractorSpy()
+        view.configure(presenter: CryptocurrencyListPresenter(view: view, interactor: interactor, router: RouterSpy()))
+        view.loadViewIfNeeded()
+        view.show([Cryptocurrency(currency: "BTC", price: "100")])
+        view.show([])
+        let table = try XCTUnwrap(view.view.subviews.compactMap { $0 as? UITableView }.first)
+        let button = try XCTUnwrap(view.view.subviews.compactMap { $0 as? UIButton }.first)
+        XCTAssertEqual(table.dataSource?.tableView(table, numberOfRowsInSection: 0), 0)
+        XCTAssertTrue(table.isHidden)
+        XCTAssertFalse(button.isHidden)
+    }
 }

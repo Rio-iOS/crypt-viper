@@ -4,6 +4,10 @@
 
 VIPERを使用します。CryptocurrencyListModuleが組み立てを担当し、PresenterがInteractorとRouterを保持します。Viewへの参照とInteractorの出力先はweakです。選択イベントはPresenterからRouterへ渡します。詳細画面のモデルは初期化時に渡します。
 
+一覧に読み込み状態と再試行ボタンを設け、失敗と空結果から再取得できます。画面の非表示時にInteractorの通信をキャンセルし、要求IDが一致しない古い応答を無視します。
+
+HTTP異常系と所有関係に加え、実際のUIViewControllerでエラー→再試行→読み込み→一覧表示・選択・画面離脱を検証します。
+
 ## 共通の設計基準
 
 - 型・メンバーは必要な範囲だけに公開します。内部状態は`private`、外部から読む状態は必要に応じて`private(set)`にします。プロトコルの要件、Storyboardの接続、サブクラスからの利用を確認して変更します。
