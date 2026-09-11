@@ -1,10 +1,10 @@
-// Assembles the VIPER feature and owns navigation, without retaining its view.
 import UIKit
 
 protocol CryptocurrencyListRouting: AnyObject {
     func showDetails(for cryptocurrency: Cryptocurrency)
 }
 
+/// 一覧画面を弱参照し、選択した通貨の詳細をモーダル表示するRouter。
 final class CryptocurrencyListRouter: CryptocurrencyListRouting {
     private weak var viewController: UIViewController?
 
@@ -18,7 +18,9 @@ final class CryptocurrencyListRouter: CryptocurrencyListRouting {
     }
 }
 
+/// 一覧機能の依存関係を組み立てる入口。
 enum CryptocurrencyListModule {
+    /// Presenter・Interactor・Routerを接続済みの一覧画面を返します。
     static func makeViewController() -> UIViewController {
         let viewController = CryptocurrencyListViewController()
         let interactor = CryptocurrencyListInteractor()

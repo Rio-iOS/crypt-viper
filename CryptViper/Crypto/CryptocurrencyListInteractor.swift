@@ -1,16 +1,11 @@
-//
-//  CryptocurrencyListInteractor.swift
-//  CryptViper
-//
-//  Network loading and response validation for the cryptocurrency sample.
-//
-
 import Foundation
 
+/// 通貨一覧の取得を開始するための入力境界。
 protocol CryptocurrencyListInteracting: AnyObject {
     func fetchCryptocurrencies()
 }
 
+/// 取得結果を受け取る出力境界。標準Interactorはメインキューから通知します。
 protocol CryptocurrencyListInteractorOutput: AnyObject {
     func didFetchCryptocurrencies(_ result: Result<[Cryptocurrency], Error>)
 }
@@ -21,6 +16,7 @@ enum NetworkError: Error, Equatable {
     case emptyData
 }
 
+/// 同時に1件のダウンロードを保持し、破棄時にキャンセルするInteractor。
 final class CryptocurrencyListInteractor: CryptocurrencyListInteracting {
     weak var output: CryptocurrencyListInteractorOutput?
 
@@ -40,6 +36,11 @@ final class CryptocurrencyListInteractor: CryptocurrencyListInteracting {
         task?.cancel()
     }
 
+    /// サンプルJSONを取得し、デコード結果を`output`へ通知します。
+    ///
+    /// 通信中の再呼び出しは無視します。空の配列は成功として扱います。
+    /// Interactorが解放された場合は結果を通知しません。
+    /// - Precondition: メインスレッドから呼び出してください。
     func fetchCryptocurrencies() {
         // Ignore repeated requests while a download is in flight.
         guard task == nil else { return }

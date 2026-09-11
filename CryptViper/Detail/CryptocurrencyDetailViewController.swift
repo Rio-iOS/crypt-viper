@@ -1,6 +1,6 @@
-// Renders an immutable quote passed by the router.
 import UIKit
 
+/// 初期化時に受け取った通貨名と価格を表示する詳細画面。
 final class CryptocurrencyDetailViewController: UIViewController {
     private let cryptocurrency: Cryptocurrency
 

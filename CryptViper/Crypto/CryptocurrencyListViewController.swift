@@ -1,4 +1,3 @@
-// Displays list state and forwards user events to the presenter.
 import UIKit
 
 protocol CryptocurrencyListView: AnyObject {
@@ -6,13 +5,16 @@ protocol CryptocurrencyListView: AnyObject {
     func showError(message: String)
 }
 
+/// 一覧・空状態・エラーを表示し、操作をPresenterへ通知する画面。
 final class CryptocurrencyListViewController: UIViewController, CryptocurrencyListView {
     private var presenter: CryptocurrencyListPresenting?
     private var cryptocurrencies: [Cryptocurrency] = []
     private let tableView = UITableView()
     private let messageLabel = UILabel()
 
-    /// Connects the presenter before the view is loaded.
+    /// Viewをロードする前にPresenterを接続します。
+    ///
+    /// - Precondition: `isViewLoaded`が`false`であること。
     func configure(presenter: CryptocurrencyListPresenting) {
         precondition(!isViewLoaded, "Configure the presenter before loading the view")
         self.presenter = presenter

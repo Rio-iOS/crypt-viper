@@ -1,4 +1,3 @@
-// Translates view events and interactor results into presentation updates.
 import Foundation
 
 protocol CryptocurrencyListPresenting: AnyObject {
@@ -6,6 +5,7 @@ protocol CryptocurrencyListPresenting: AnyObject {
     func didSelect(_ cryptocurrency: Cryptocurrency)
 }
 
+/// 一覧の入力イベントと取得結果を、表示更新および詳細画面への遷移へ変換するPresenter。
 final class CryptocurrencyListPresenter: CryptocurrencyListPresenting, CryptocurrencyListInteractorOutput {
     private weak var view: CryptocurrencyListView?
     private let interactor: CryptocurrencyListInteracting
