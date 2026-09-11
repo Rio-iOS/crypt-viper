@@ -1,83 +1,106 @@
-//
-//  CryptoTests.swift
-//  CryptViperTests
-//
-//  Regression tests for VIPER ownership, loading order, and HTTP failures.
-//
-
+// Regression tests for feature behavior and ownership.
 @testable import CryptViper
 import XCTest
 
-final class CryptoPresenterTests: XCTestCase {
+final class CryptocurrencyListPresenterTests: XCTestCase {
     func testLoadingStartsOnlyWhenViewIsReady() {
-        let presenter = CryptoPresenter()
         let interactor = InteractorSpy()
-        presenter.interactor = interactor
-        XCTAssertEqual(interactor.requests, 0)
+        let view = ViewSpy()
+        let presenter = CryptocurrencyListPresenter(view: view, interactor: interactor, router: RouterSpy())
+        XCTAssertEqual(interactor.requestCount, 0)
         presenter.viewDidLoad()
-        XCTAssertEqual(interactor.requests, 1)
+        XCTAssertEqual(interactor.requestCount, 1)
     }
 
     func testSuccessDisplaysCurrenciesAndPrices() {
         let view = ViewSpy()
-        let presenter = CryptoPresenter()
-        presenter.view = view
-        presenter.interactorDidDownloadCryptos(result: .success([Crypto(currency: "BTC", price: "100")]))
-        XCTAssertEqual(view.cryptos?.first?.currency, "BTC")
-        XCTAssertEqual(view.cryptos?.first?.price, "100")
-        XCTAssertNil(view.error)
+        let presenter = makePresenter(view: view)
+        presenter.didFetchCryptocurrencies(.success([Cryptocurrency(currency: "BTC", price: "100")]))
+        XCTAssertEqual(view.cryptocurrencies?.first?.currency, "BTC")
+        XCTAssertEqual(view.cryptocurrencies?.first?.price, "100")
+        XCTAssertNil(view.errorMessage)
     }
 
     func testEmptyResponseIsForwardedToTheView() {
         let view = ViewSpy()
-        let presenter = CryptoPresenter()
-        presenter.view = view
-        presenter.interactorDidDownloadCryptos(result: .success([]))
-        XCTAssertEqual(view.cryptos?.count, 0)
-        XCTAssertNil(view.error)
+        makePresenter(view: view).didFetchCryptocurrencies(.success([]))
+        XCTAssertEqual(view.cryptocurrencies?.count, 0)
+        XCTAssertNil(view.errorMessage)
     }
 
-    func testFailureDisplaysErrorInsteadOfResults() {
+    func testFailureDisplaysAnError() {
         let view = ViewSpy()
-        let presenter = CryptoPresenter()
-        presenter.view = view
-        presenter.interactorDidDownloadCryptos(result: .failure(URLError(.notConnectedToInternet)))
-        XCTAssertNotNil(view.error)
-        XCTAssertNil(view.cryptos)
+        makePresenter(view: view).didFetchCryptocurrencies(.failure(URLError(.notConnectedToInternet)))
+        XCTAssertNotNil(view.errorMessage)
+        XCTAssertNil(view.cryptocurrencies)
     }
 
-    func testPresenterDoesNotRetainView() {
-        let presenter = CryptoPresenter()
+    func testSelectionIsForwardedToRouter() {
+        let view = ViewSpy()
+        let router = RouterSpy()
+        let presenter = CryptocurrencyListPresenter(view: view, interactor: InteractorSpy(), router: router)
+        let quote = Cryptocurrency(currency: "BTC", price: "100")
+        presenter.didSelect(quote)
+        XCTAssertEqual(router.selectedCryptocurrency, quote)
+    }
+
+    func testPresenterDoesNotRetainViewAndAcceptsLateResults() {
         var view: ViewSpy? = ViewSpy()
         weak var reference = view
-        view?.presenter = presenter
-        presenter.view = view
+        let presenter = makePresenter(view: view!)
         view = nil
         XCTAssertNil(reference)
-        XCTAssertNil(presenter.view)
+        presenter.didFetchCryptocurrencies(.success([]))
     }
 
-    func testInteractorDoesNotRetainPresenter() {
-        let interactor = CryptoInteractor()
-        var presenter: CryptoPresenter? = CryptoPresenter()
-        weak var reference = presenter
-        presenter?.interactor = interactor
-        interactor.presenter = presenter
-        presenter = nil
+    func testInteractorDoesNotRetainOutput() {
+        let interactor = CryptocurrencyListInteractor()
+        var output: OutputSpy? = OutputSpy { _ in }
+        weak var reference = output
+        interactor.output = output
+        output = nil
         XCTAssertNil(reference)
-        XCTAssertNil(interactor.presenter)
+        XCTAssertNil(interactor.output)
     }
 
-    func testRouterDoesNotFormOwnershipCycle() {
-        var router: AnyRouter? = CryptoRouter.startExecution()
-        weak var view = router?.entry
-        XCTAssertNotNil(view)
-        router = nil
-        XCTAssertNil(view)
+    func testAssemblyReleasesViewController() {
+        weak var reference: UIViewController?
+        autoreleasepool {
+            let viewController = CryptocurrencyListModule.makeViewController()
+            reference = viewController
+        }
+        XCTAssertNil(reference)
+    }
+
+    func testViewPresenterInteractorAndRouterAreReleasedTogether() {
+        weak var viewReference: CryptocurrencyListViewController?
+        weak var presenterReference: CryptocurrencyListPresenter?
+        weak var interactorReference: CryptocurrencyListInteractor?
+        weak var routerReference: CryptocurrencyListRouter?
+        autoreleasepool {
+            let view = CryptocurrencyListViewController()
+            let interactor = CryptocurrencyListInteractor()
+            let router = CryptocurrencyListRouter(viewController: view)
+            let presenter = CryptocurrencyListPresenter(view: view, interactor: interactor, router: router)
+            view.configure(presenter: presenter)
+            interactor.output = presenter
+            viewReference = view
+            presenterReference = presenter
+            interactorReference = interactor
+            routerReference = router
+        }
+        XCTAssertNil(viewReference)
+        XCTAssertNil(presenterReference)
+        XCTAssertNil(interactorReference)
+        XCTAssertNil(routerReference)
+    }
+
+    private func makePresenter(view: ViewSpy) -> CryptocurrencyListPresenter {
+        CryptocurrencyListPresenter(view: view, interactor: InteractorSpy(), router: RouterSpy())
     }
 }
 
-final class CryptoInteractorTests: XCTestCase {
+final class CryptocurrencyListInteractorTests: XCTestCase {
     private var session: URLSession!
 
     override func setUp() {
@@ -130,43 +153,42 @@ final class CryptoInteractorTests: XCTestCase {
         }
     }
 
-    private func load(path: String, assertions: @escaping (Result<[Crypto], Error>) -> Void) {
+    private func load(path: String, assertions: @escaping (Result<[Cryptocurrency], Error>) -> Void) {
         let completed = expectation(description: "Download completes")
-        let presenter = PresenterSpy { result in
+        let presenter = OutputSpy { result in
             assertions(result)
             completed.fulfill()
         }
-        let interactor = CryptoInteractor(session: session, endpoint: URL(string: "https://example.invalid/" + path)!)
-        interactor.presenter = presenter
-        interactor.downloadCryptos()
+        let interactor = CryptocurrencyListInteractor(session: session, endpoint: URL(string: "https://example.invalid/" + path)!)
+        interactor.output = presenter
+        interactor.fetchCryptocurrencies()
         withExtendedLifetime((interactor, presenter)) {
             wait(for: [completed], timeout: 3)
         }
     }
 }
 
-private final class InteractorSpy: AnyInteractor {
-    weak var presenter: AnyPresenter?
-    var requests = 0
-    func downloadCryptos() { requests += 1 }
+private final class InteractorSpy: CryptocurrencyListInteracting {
+    private(set) var requestCount = 0
+    func fetchCryptocurrencies() { requestCount += 1 }
 }
 
-private final class ViewSpy: AnyView {
-    var presenter: AnyPresenter?
-    var cryptos: [Crypto]?
-    var error: String?
-    func update(with cryptos: [Crypto]) { self.cryptos = cryptos }
-    func update(with error: String) { self.error = error }
+private final class ViewSpy: CryptocurrencyListView {
+    private(set) var cryptocurrencies: [Cryptocurrency]?
+    private(set) var errorMessage: String?
+    func show(_ cryptocurrencies: [Cryptocurrency]) { self.cryptocurrencies = cryptocurrencies }
+    func showError(message: String) { errorMessage = message }
 }
 
-private final class PresenterSpy: AnyPresenter {
-    weak var router: AnyRouter?
-    var interactor: AnyInteractor?
-    weak var view: AnyView?
-    let completion: (Result<[Crypto], Error>) -> Void
-    init(completion: @escaping (Result<[Crypto], Error>) -> Void) { self.completion = completion }
-    func viewDidLoad() {}
-    func interactorDidDownloadCryptos(result: Result<[Crypto], Error>) { completion(result) }
+private final class RouterSpy: CryptocurrencyListRouting {
+    private(set) var selectedCryptocurrency: Cryptocurrency?
+    func showDetails(for cryptocurrency: Cryptocurrency) { selectedCryptocurrency = cryptocurrency }
+}
+
+private final class OutputSpy: CryptocurrencyListInteractorOutput {
+    private let completion: (Result<[Cryptocurrency], Error>) -> Void
+    init(completion: @escaping (Result<[Cryptocurrency], Error>) -> Void) { self.completion = completion }
+    func didFetchCryptocurrencies(_ result: Result<[Cryptocurrency], Error>) { completion(result) }
 }
 
 private final class CryptoURLProtocol: URLProtocol {

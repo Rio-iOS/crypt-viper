@@ -15,10 +15,10 @@ VIPERの役割分担と、HTTP通信から一覧表示までの流れを学ぶiO
 - **View**: 一覧、読込中・空・エラー状態を表示し、画面準備完了をPresenterへ通知します。
 - **Presenter**: ViewからのイベントをInteractorへ渡し、結果をViewへ返します。
 - **Interactor**: 注入されたURLSessionでJSONを取得し、HTTPステータスとJSONを検証します。結果はメインキューで返します。
-- **Entity**: 通貨名と価格を表す`Crypto`です。
-- **Router**: 依存関係を組み立てます。SceneがRouter、RouterがView、ViewがPresenter、PresenterがInteractorを保持します。逆方向の参照はweakです。
+- **Entity**: 通貨名と価格を表す`Cryptocurrency`です。
+- **Router**: 詳細画面への遷移を担当します。Moduleが依存関係を組み立て、ViewがPresenter、PresenterがInteractorとRouterを保持します。PresenterとRouterの画面参照、Interactorの出力先はweakです。
 
-詳細画面への遷移は現在Viewが担当しています。Routerへの集約、再試行UI、Dynamic Type・VoiceOverの確認は今後の改善対象です。
+詳細画面への遷移はPresenterからRouterへ指示します。表示にはDynamic Type対応のフォントとAuto Layoutを使います。再試行UIとVoiceOverの操作確認は今後の改善対象です。
 
 ## 検証
 
@@ -46,3 +46,7 @@ GitHub Actionsでも同じテストと整形検査を実行します。CIの結�
 通貨データは[atilsamancioglu/K21-JSONDataSet](https://github.com/atilsamancioglu/K21-JSONDataSet)の`crypto.json`を参照します。通信先の可用性やデータ形式はこのリポジトリでは管理していません。
 
 このリポジトリは学習用の実装です。元の教材の詳細と、このリポジトリ全体のライセンスは未記載のため、再配布条件は別途確認してください。
+
+## Swiftコード品質
+
+[設計・命名・所有関係の方針と、この教材への適用範囲](SWIFT-QUALITY.md)を参照してください。

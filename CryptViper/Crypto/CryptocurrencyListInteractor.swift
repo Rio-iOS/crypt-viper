@@ -1,5 +1,5 @@
 //
-//  Interactor.swift
+//  CryptocurrencyListInteractor.swift
 //  CryptViper
 //
 //  Network loading and response validation for the cryptocurrency sample.
@@ -7,9 +7,12 @@
 
 import Foundation
 
-protocol AnyInteractor: AnyObject {
-    var presenter: AnyPresenter? { get set }
-    func downloadCryptos()
+protocol CryptocurrencyListInteracting: AnyObject {
+    func fetchCryptocurrencies()
+}
+
+protocol CryptocurrencyListInteractorOutput: AnyObject {
+    func didFetchCryptocurrencies(_ result: Result<[Cryptocurrency], Error>)
 }
 
 enum NetworkError: Error, Equatable {
@@ -18,8 +21,8 @@ enum NetworkError: Error, Equatable {
     case emptyData
 }
 
-final class CryptoInteractor: AnyInteractor {
-    weak var presenter: AnyPresenter?
+final class CryptocurrencyListInteractor: CryptocurrencyListInteracting {
+    weak var output: CryptocurrencyListInteractorOutput?
 
     private let session: URLSession
     private let endpoint: URL
@@ -37,11 +40,11 @@ final class CryptoInteractor: AnyInteractor {
         task?.cancel()
     }
 
-    func downloadCryptos() {
+    func fetchCryptocurrencies() {
         // Ignore repeated requests while a download is in flight.
         guard task == nil else { return }
         task = session.dataTask(with: endpoint) { [weak self] data, response, error in
-            let result: Result<[Crypto], Error> = Result {
+            let result: Result<[Cryptocurrency], Error> = Result {
                 if let error = error { throw error }
                 guard let response = response as? HTTPURLResponse else {
                     throw NetworkError.invalidResponse
@@ -50,12 +53,12 @@ final class CryptoInteractor: AnyInteractor {
                     throw NetworkError.httpStatus(response.statusCode)
                 }
                 guard let data = data else { throw NetworkError.emptyData }
-                return try JSONDecoder().decode([Crypto].self, from: data)
+                return try JSONDecoder().decode([Cryptocurrency].self, from: data)
             }
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 self.task = nil
-                self.presenter?.interactorDidDownloadCryptos(result: result)
+                self.output?.didFetchCryptocurrencies(result)
             }
         }
         task?.resume()
